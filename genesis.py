@@ -1,6 +1,6 @@
 import hashlib, struct, os, time, sys, argparse
 import scrypt
-from construct import Struct, Int32ul, Bytes, Byte
+from construct import *
 from ecdsa import SigningKey, SECP256k1
 
 
@@ -85,39 +85,42 @@ def create_transaction(input_script, output_script, options):
         "locktime" / Int32ul
     )
 
-    tx = transaction.parse(b'\x00' * (127 + len(input_script)))
-    tx.version = struct.pack('<I', 1)
-    tx.num_inputs = 1
-    tx.prev_output = struct.pack('<qqqq', 0, 0, 0, 0)
-    tx.prev_out_idx = 0xFFFFFFFF
-    tx.input_script_len = len(input_script)
-    tx.input_script = input_script
-    tx.sequence = 0xFFFFFFFF
-    tx.num_outputs = 1
-    tx.out_value = struct.pack('<q', options.value)
-    tx.output_script_len = 0x43
-    tx.output_script = output_script
-    tx.locktime = 0
+    tx = dict(
+        version=1,
+        num_inputs=1,
+        prev_output=bytes(32),
+        prev_out_idx=0xFFFFFFFF,
+        input_script_len=len(input_script),
+        input_script=input_script,
+        sequence=0xFFFFFFFF,
+        num_outputs=1,
+        out_value=struct.pack('<Q', options.value),
+        output_script_len=0x43,
+        output_script=output_script,
+        locktime=0
+    )
     return transaction.build(tx)
 
 
 def create_block_header(hash_merkle_root, time_val, bits, nonce):
-    block_header = Struct("block_header",
-        Bytes("version", 4),
-        Bytes("hash_prev_block", 32),
-        Bytes("hash_merkle_root", 32),
-        Bytes("time", 4),
-        Bytes("bits", 4),
-        Bytes("nonce", 4))
+    block_header = Struct(
+        "version" / Int32ul,
+        "hash_prev_block" / Bytes(32),
+        "hash_merkle_root" / Bytes(32),
+        "time" / Int32ul,
+        "bits" / Int32ul,
+        "nonce" / Int32ul
+    )
 
-    genesisblock = block_header.parse(b'\x00' * 80)
-    genesisblock.version = struct.pack('<I', 1)
-    genesisblock.hash_prev_block = struct.pack('<qqqq', 0, 0, 0, 0)
-    genesisblock.hash_merkle_root = hash_merkle_root
-    genesisblock.time = struct.pack('<I', time_val)
-    genesisblock.bits = struct.pack('<I', bits)
-    genesisblock.nonce = struct.pack('<I', nonce)
-    return block_header.build(genesisblock)
+    header = dict(
+        version=1,
+        hash_prev_block=bytes(32),
+        hash_merkle_root=hash_merkle_root,
+        time=time_val,
+        bits=bits,
+        nonce=nonce
+    )
+    return block_header.build(header)
 
 
 def generate_hash(data_block, algorithm, start_nonce, bits):
