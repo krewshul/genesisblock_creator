@@ -1,6 +1,6 @@
 import hashlib, struct, os, time, sys, argparse
 import scrypt
-from construct import *
+from construct import Struct, Int32ul, Bytes, Byte
 from ecdsa import SigningKey, SECP256k1
 
 
@@ -70,19 +70,20 @@ def create_output_script(pubkey):
 
 
 def create_transaction(input_script, output_script, options):
-    transaction = Struct("transaction",
-        Bytes("version", 4),
-        Byte("num_inputs"),
-        StaticField("prev_output", 32),
-        UBInt32('prev_out_idx'),
-        Byte('input_script_len'),
-        Bytes('input_script', len(input_script)),
-        UBInt32('sequence'),
-        Byte('num_outputs'),
-        Bytes('out_value', 8),
-        Byte('output_script_len'),
-        Bytes('output_script', 0x43),
-        UBInt32('locktime'))
+    transaction = Struct(
+        "version" / Int32ul,
+        "num_inputs" / Byte,
+        "prev_output" / Bytes(32),
+        "prev_out_idx" / Int32ul,
+        "input_script_len" / Byte,
+        "input_script" / Bytes(len(input_script)),
+        "sequence" / Int32ul,
+        "num_outputs" / Byte,
+        "out_value" / Bytes(8),
+        "output_script_len" / Byte,
+        "output_script" / Bytes(0x43),
+        "locktime" / Int32ul
+    )
 
     tx = transaction.parse(b'\x00' * (127 + len(input_script)))
     tx.version = struct.pack('<I', 1)
