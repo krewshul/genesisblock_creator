@@ -1,6 +1,7 @@
 import hashlib, struct, os, time, sys, argparse
 import scrypt
 from construct import *
+from ecdsa import SigningKey, SECP256k1
 
 
 def main():
@@ -28,13 +29,18 @@ def get_args():
                         type=str)
     parser.add_argument("-n", "--nonce", dest="nonce", default=0, type=int)
     parser.add_argument("-a", "--algorithm", dest="algorithm", default="SHA256")
-    parser.add_argument("-p", "--pubkey", dest="pubkey",
-                        default="04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f",
-                        type=str)
+    parser.add_argument("-p", "--pubkey", dest="pubkey", type=str)
     parser.add_argument("-v", "--value", dest="value", default=5000000000, type=int)
     parser.add_argument("-b", "--bits", dest="bits", type=int)
 
     options = parser.parse_args()
+
+    if not options.pubkey:
+        print("[+] No pubkey provided, generating random public key...")
+        sk = SigningKey.generate(curve=SECP256k1)
+        vk = sk.verifying_key
+        options.pubkey = '04' + vk.to_string().hex()
+        print("[+] Generated pubkey:", options.pubkey)
 
     if not options.bits:
         options.bits = 0x1e0ffff0 if options.algorithm in ["scrypt", "X11", "X13", "X15"] else 0x1d00ffff
