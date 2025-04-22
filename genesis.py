@@ -31,7 +31,7 @@ def get_args():
     parser.add_argument("-a", "--algorithm", dest="algorithm", default="SHA256")
     parser.add_argument("-p", "--pubkey", dest="pubkey", type=str)
     parser.add_argument("-v", "--value", dest="value", default=5000000000, type=int)
-    parser.add_argument("-b", "--bits", dest="bits", type=int)
+    parser.add_argument("-b", "--bits", dest="bits", type=lambda x: int(x, 0))
 
     options = parser.parse_args()
 
