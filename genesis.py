@@ -25,7 +25,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--time", dest="time", default=int(time.time()), type=int)
     parser.add_argument("-z", "--timestamp", dest="timestamp",
-                        default="The Times 03/Jan/2009 Chancellor on brink of second bailout for banks",
+                        default="04/24/2025 - OurCoin - SF is not what it was",
                         type=str)
     parser.add_argument("-n", "--nonce", dest="nonce", default=0, type=int)
     parser.add_argument("-a", "--algorithm", dest="algorithm", default="SHA256")
