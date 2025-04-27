@@ -23,7 +23,7 @@ def main():
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--time", dest="time", default=int(time.time()), type=int)
+    parser.add_argument("-t", "--time", dest="time", default=None, type=int, help="Block time (default: current time)")
     parser.add_argument("-z", "--timestamp", dest="timestamp",
                         default="04/24/2025 - OurCoin - SF is not what it was",
                         type=str)
@@ -34,6 +34,9 @@ def get_args():
     parser.add_argument("-b", "--bits", dest="bits", type=lambda x: int(x, 0))
 
     options = parser.parse_args()
+
+    if options.time is None:
+        options.time = int(time.time())
 
     if not options.pubkey:
         print("[+] No pubkey provided, generating random public key...")
